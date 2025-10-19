@@ -11,7 +11,7 @@ export const signupUser=async(name:string,lastName:string,email:string,password:
         password
     })
 
-    
+
     return res.data;
     } catch (error) {
         console.log(error);
@@ -26,6 +26,16 @@ export const signinUser=async(email:string,password:string)=>
             email,
             password
         })
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const authCheckStatus=async()=>{
+    try {
+        const res=await axios.get("/user/auth-status");
         return res.data;
     } catch (error) {
         console.log(error);

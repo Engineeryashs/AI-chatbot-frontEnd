@@ -1,33 +1,51 @@
 import { Box, Button, Typography } from '@mui/material'
 import CustomizedInput from '../Components/shared/CustomizedInput'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { IoIosLogIn } from 'react-icons/io'
 import { useAuth } from '../context/Auth-Context'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
-
+import axios from 'axios'
 const Signup = () => {
   const auth=useAuth();
   const navigate=useNavigate();
   const handleSubmit =async (e:React.FormEvent<HTMLFormElement>) => { 
     e.preventDefault();
     const formData=new FormData(e.currentTarget);
+    console.log("Jai seetaram bhai");
     const email=formData.get("email") as string;
+     console.log(email);
     const password=formData.get("password") as string;
+     console.log(password);
     const name=formData.get("name") as string;
+     console.log(name);
     const lastName=formData.get("lastName") as string;
+     console.log(lastName);
 
     try {
-      console.log(auth)
+      console.log("hi bhai");
+      console.log(auth);
       toast.loading("Signing Up", { id: "signup" });
       await auth?.signup(name,lastName,email,password);
       navigate("/chats");
       toast.success("Signed Up Successfully", { id: "signup" });
-    } catch (error) {
+    } catch (error:any) {
           console.log(error);
-      toast.error("Signing Up Failed", { id: "signup" });
+          if(axios.isAxiosError(error))
+          {
+                 toast.error(`Signing Up Failed as ${error.response?.data?.msg}`, { id: "signup" });
+          }
+          else{
+            toast.error("An unexpected error occured!!")
+          }
     }
   }
+  useEffect(() => {
+    if(auth?.user)
+    {
+     navigate("/chats")
+    }
+    }, [auth]);
   return (
     <Box height={"100%"} width={"100%"} display={"flex"} flex={1}>
       <Box padding={8} mt={8} display={{ md: "flex", sm: "none", xs: "none" }}>
