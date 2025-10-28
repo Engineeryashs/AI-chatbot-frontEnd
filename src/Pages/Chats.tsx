@@ -1,30 +1,46 @@
 import { Avatar, Box, Button, IconButton, Typography } from '@mui/material';
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import { useAuth } from '../context/Auth-Context';
 import { red } from '@mui/material/colors';
 import ChatItems from '../Components/chats/ChatItems';
 import { IoMdSend } from 'react-icons/io';
+import { sendChatMessages } from '../helpers/api-communicator';
 
 const Chats = () => {
   const auth = useAuth();
-  type Message = {
-    role: "user" | "assistant",
-    content: string
+  type Message={
+    role:"user"|"assistant";
+    content:string;
   }
-  const chatMessages: Message[] = [
-    { role: "user", content: "Hi there!" },
-    { role: "assistant", content: "Hello! How can I help you today?" },
-    { role: "user", content: "Tell me a joke." },
-    { role: "assistant", content: "Why did the developer go broke? Because he used up all his cache!" },
-    { role: "user", content: "Hi there!" },
-    { role: "assistant", content: "Hello! How can I help you today?" },
-    { role: "user", content: "Tell me a joke." },
-    { role: "assistant", content: "Why did the developer go broke? Because he used up all his cache!" },
-    { role: "user", content: "Hi there!" },
-    { role: "assistant", content: "Hello! How can I help you today?" },
-    { role: "user", content: "Tell me a joke." },
-    { role: "assistant", content: "Why did the developer go broke? Because he used up all his cache!" }
-  ]
+  const inputRef=useRef<HTMLInputElement|null>(null);
+  console.log("Chat component re-rendering")
+  const [chatMessages,setchatMessages]=useState<Message[]>([]);
+   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault(); // prevent newline
+    handleSubmit();
+  }
+};
+
+  async function handleSubmit(){
+    /*Accessing the content of the inputRef tagged element*/
+    const content=inputRef.current?.value as string;
+    /* Clears the input field after the message is sent*/
+     if (inputRef && inputRef.current) {
+      inputRef.current.value = "";
+    }
+        const newMessage:Message={role:"user",content}
+        setchatMessages((prev)=>{return [...prev,newMessage ]})
+      
+        /*Now we will call AI using back-end router that we designed to call GPT or 
+        Deepseak or any AI models*/
+
+           /*Sending chat messages*/
+            const chatData = await sendChatMessages(content);
+            setchatMessages([...chatData?.chats]);//Creates a new array copying before wala so that it will update state
+      
+  }
+
 /*Here we are creating chat page s frontend*/
   return (
     <Box sx={{
@@ -118,9 +134,11 @@ const Chats = () => {
         }}>
           {
             chatMessages.map(function (ele, index: number) {
-              return <ChatItems role={ele.role} content={ele.content} key={index} />
+              console.log("Hrllo"+index+"S"+ele)
+              return <ChatItems role={ele.role} content={ele.content} key={index}/>
             })
           }
+         
         </Box>
         <Box sx={{
           width: "100%",
@@ -131,7 +149,7 @@ const Chats = () => {
           mb:3
         }}>
           {" "}
-          <input type="text" placeholder='Ask anything' style={{
+          <input ref={inputRef} type="text" placeholder='Ask anything'  onKeyDown={handleKeyPress} style={{
             width: "100%",
             backgroundColor: "transparent",
             padding: "30px",
@@ -142,9 +160,9 @@ const Chats = () => {
           
           }} />
 
-          <IconButton sx={{ color: "white", mx: 1
+          <IconButton onClick={handleSubmit} sx={{ color: "white", mx: 1
           }}>
-            <IoMdSend />
+            <IoMdSend/>
           </IconButton>
         </Box>
 

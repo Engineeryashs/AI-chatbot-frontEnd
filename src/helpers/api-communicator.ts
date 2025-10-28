@@ -42,3 +42,13 @@ export const authCheckStatus=async()=>{
         throw error;
     }
 }
+
+export const sendChatMessages= async(message:string)=>{
+    try {
+        const res=await axios.post("/chats/new",{message})
+        return res.data;
+    } catch (error) {
+        console.log(error);
+        throw error;   
+    }
+}
